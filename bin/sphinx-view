@@ -36,4 +36,8 @@ if __name__ == '__main__':
             WORKING_DIR=working_dir,
             SERVER_PORT=args.port,
         )
-        server.serve(port=args.port, host='localhost', open_url=True)
+        server.serve(
+            port=args.port,
+            host='localhost',
+            open_url_delay=0.5,
+        )
