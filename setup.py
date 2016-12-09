@@ -18,6 +18,7 @@ setup(
         'Flask',
         'inflection',
         'sphinx',
+        'livereload',
     ],
     extras_require={
         'dev': [
