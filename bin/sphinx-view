@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-import os
 import tempfile
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from sview import create_server, build
+import os
 
 if __name__ == '__main__':
     parser = ArgumentParser(
@@ -19,6 +19,11 @@ if __name__ == '__main__':
         help='Set the flask webserver port',
         )
     parser.add_argument(
+        '-s',
+        '--source-dir',
+        help='Include autodoc for sources at DIR',
+        )
+    parser.add_argument(
         'target',
         nargs=1,
         help='The target to view',
@@ -26,15 +31,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     target = args.target.pop()
-    if not os.path.isfile(target):
-        parser.error("The target must be specified as a single file")
 
     with tempfile.TemporaryDirectory() as working_dir:
-        build(target, working_dir)
         server = create_server(
             TARGET=target,
             WORKING_DIR=working_dir,
             SERVER_PORT=args.port,
+            SOURCE_DIR=args.source_dir,
         )
         server.serve(
             port=args.port,

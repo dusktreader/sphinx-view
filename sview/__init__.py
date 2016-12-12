@@ -2,28 +2,40 @@ import flask
 import os
 import re
 import shutil
+import sys
 
+from pathlib import Path
 from livereload import Server
 from sphinx.application import Sphinx
 from textwrap import dedent
 
-
-def find_includes(target_path):
-    includes = []
-    print("reading lines from {}".format(target_path))
-    with open(target_path, 'r') as target_file:
-        for line in target_file.readlines():
+def find_includes(original_path):
+    print("looking for includes in {}".format(original_path.parent))
+    with open(str(original_path), 'r') as original_file:
+        for line in original_file.readlines():
             match = re.search(r'\.\. (?:literal)?include::\s*([^\s]+)', line)
             if match is not None:
                 print("found a match in in {}".format(line))
-                include_path = match.group(1)
-                print("match was {}".format(include_path))
-                includes.append(include_path)
-    print("includes found: {}".format(includes))
-    return includes
+                include = match.group(1)
+                print("match was {}".format(include))
+                include_path = original_path.parent / include
+                print("include path {}".format(include_path))
+                yield include_path
 
+def rm(dst):
+    if dst.exists():
+        if dst.is_dir():
+            shutil.rmtree(str(dst))
+        else:
+            os.remove(str(dst))
 
-def build(target_path, working_dir):
+def copy(src, dst):
+    if src.is_dir():
+        shutil.copytree(str(src), str(dst))
+    else:
+        shutil.copy(str(src), str(dst))
+
+def build(target, working_dir, source_dir):
     """
     Rebuilds a target in a specified working directory
 
@@ -33,43 +45,58 @@ def build(target_path, working_dir):
         - link copy as well
         - replace prints with logging
     """
-    build_dir = os.path.join(working_dir, 'build')
-    source_dir = os.path.join(working_dir, 'source')
-    if not os.path.exists(source_dir):
-        os.mkdir(source_dir)
+    build_dir = Path(working_dir, 'build')
 
-    (target_dir, target) = os.path.split(target_path)
-    (target_name, target_ext) = os.path.splitext(target)
-    print("target_path is {}".format(target_path))
-    print("target_dir is {}".format(target_dir))
-    print("target is {}".format(target))
-    print("target_name is {}".format(target_name))
-    print("target_ext is {}".format(target_ext))
-    new_target_path = os.path.join(source_dir, target)
-    print("new target path is {}".format(new_target_path))
-    shutil.copyfile(target_path, new_target_path)
+    rm(build_dir)
+    build_dir.mkdir(parents=True)
 
-    for include_path in find_includes(target_path):
-        include_source_path = os.path.join(target_dir, include_path)
-        print("include_source_path: {}".format(include_source_path))
-        include_target_path = os.path.join(source_dir, include_path)
-        include_target_dir = os.path.dirname(include_target_path)
-        print("making: {}".format(include_target_dir))
-        os.makedirs(include_target_dir, exist_ok=True)
-        shutil.copyfile(include_source_path, include_target_path)
+    source_suffix = None
+    original_path = Path(target)
+    if original_path.is_dir():
+        found_index = False
+        for element_path in original_path.glob('*'):
+            final_path = build_dir / element_path.name
+            print("Final path is: {}".format(final_path))
+            if element_path.stem == 'index' and not element_path.is_dir():
+                found_index = True
+                source_suffix = element_path.suffix
+            copy(element_path, final_path)
+        if not found_index:
+            raise Exception("Couldn't find index in {}".format(original_path))
+    else:
+        source_suffix = original_path.suffix
+        final_path = build_dir / ('index' + source_suffix)
+        copy(original_path, final_path)
 
-    conf_path = os.path.join(source_dir, 'conf.py')
-    with open(conf_path, 'w') as conf_file:
-        conf_file.write(dedent(
-            """
-            source_suffix = '{}'
-            master_doc = '{}'
-            html_theme = 'alabaster'
-            html_static_path = ['_static']
-            """.format(target_ext, target_name)
-        ))
+        for include_path in find_includes(original_path):
+            rel_include_path = include_path.relative_to(original_path.parent)
+            print("relative include path: {}".format(rel_include_path))
+            final_include_path = build_dir / rel_include_path
+            final_include_path.parent.mkdir(parents=True)
+            print("copying {} to {}".format(include_path, final_include_path))
+            copy(include_path, final_include_path)
 
-    builder = Sphinx(source_dir, source_dir, build_dir, build_dir, 'html')
+    conf_content = dedent("""
+        source_suffix = '{}'
+        master_doc = 'index'
+        html_theme = 'alabaster'
+        html_static_path = ['_static']
+    """).format(source_suffix)
+
+    if source_dir is not None:
+        conf_content = conf_content + dedent("""
+            extensions = ['sphinx.ext.autodoc']
+            import sys
+            sys.path.insert(0, '{}')
+        """).format(source_dir)
+
+    conf_path = build_dir / 'conf.py'
+    with open(str(conf_path), 'w') as conf_file:
+        conf_file.write(conf_content)
+
+    build_dir_str = str(build_dir)
+    build_dir_str = str(build_dir)
+    builder = Sphinx(build_dir_str, build_dir_str, build_dir_str, build_dir_str, 'html')
     builder.build()
 
 
@@ -79,10 +106,12 @@ def create_server(**config):
     """
     working_dir = config.get('WORKING_DIR')
     target_path = config.get('TARGET')
-    (target_dir, target) = os.path.split(target_path)
-    (target_name, target_ext) = os.path.splitext(target)
+    source_dir = config.get('SOURCE_DIR')
     template_folder = os.path.join(working_dir, 'build')
     static_folder = os.path.join(template_folder, '_static')
+
+    build(target_path, working_dir, source_dir)
+
     app = flask.Flask(
         __name__,
         static_folder=static_folder,
@@ -95,11 +124,18 @@ def create_server(**config):
 
     @app.route('/')
     def index():
-        return flask.render_template('{}.html'.format(target_name))
+        return flask.render_template('index.html')
+
+    @app.route('/<path:page>')
+    def subpage(page):
+        return flask.render_template(page)
 
     app.logger.debug("configuring livereload server")
     server = Server(app.wsgi_app)
-    app.logger.debug("setting watch for target: {}".format(target))
-    server.watch(target, lambda: build(target, working_dir))
+    app.logger.debug("setting watch for target: {}".format(target_path))
+    server.watch(
+        target_path,
+        lambda: build(target_path, working_dir, source_dir),
+    )
     app.logger.debug("Finished creating server")
     return server
