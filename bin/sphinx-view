@@ -9,7 +9,7 @@ import os
 if __name__ == '__main__':
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
-        description='Start the Flask webserver',
+        description='Provides a live view of sphinx or restructuredtext docs',
         )
     parser.add_argument(
         '-p',
@@ -19,9 +19,16 @@ if __name__ == '__main__':
         help='Set the flask webserver port',
         )
     parser.add_argument(
-        '-s',
-        '--source-dir',
-        help='Include autodoc for sources at DIR',
+        '-P',
+        '--package',
+        action='store_true',
+        help='Generate documentation for a python package',
+        )
+    parser.add_argument(
+        '-d',
+        '--package-docs',
+        default='docs',
+        help='Set the subfolder of package where the docs to build are found',
         )
     parser.add_argument(
         'target',
@@ -37,7 +44,8 @@ if __name__ == '__main__':
             TARGET=target,
             WORKING_DIR=working_dir,
             SERVER_PORT=args.port,
-            SOURCE_DIR=args.source_dir,
+            PACKAGE=args.package,
+            PACKAGE_DOCS=args.package_docs,
         )
         server.serve(
             port=args.port,
