@@ -2,10 +2,6 @@
  sphinx-view
 *************
 
-.. image:: https://travis-ci.org/dusktreader/sphinx-view.svg?branch=master
-   :target: https://travis-ci.org/dusktreader/sphinx-view
-   :alt: Build Status
-
 .. image:: https://readthedocs.org/projects/sphinx-view/badge/?version=latest
    :target: http://sphinx-view.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
@@ -40,5 +36,5 @@ Super-quick Start
 
 Full Documentation
 ------------------
- - `spinx-view documentation home <http://spinx-view.readthedocs.io>`_
+ - `spinx-view documentation home <http://sphinx-view.readthedocs.io>`_
  - `raw reStructuredText docs <https://github.com/dusktreader/sphinx-view/tree/master/docs>`_
