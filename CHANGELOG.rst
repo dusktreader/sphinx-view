@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Unreleased
 ----------
+- Added a Manifest.in
+- Updated project description in the metadata file
 
 v0.1.0 - 2016-12-15
 -------------------
 
-Added
-.....
 - First release of sphinx-view
-- This CHANGELOG
-- README providing a brief overview of the project
-- Documentation on a readthedocs site include full module docs
+- Added this CHANGELOG
+- Added a README providing a brief overview of the project
+- Added documentation on a readthedocs site include full module docs

@@ -9,10 +9,12 @@ Requirements
 Note on Requirements
 ....................
 
-I do not currently plan to support python 2. The original author is a die-hard
-believer in python 3, and has plenty of more interesting hobbies than getting
-this package to work in python 3 as well. As for older versions of python 3, I
-plan to eventually add support going back no farther than python 3.3
+There are not currently plans to support python 2. Since this is a stand-alone
+application, it is not as important to support multiple versions of python.
+Additionally, the original author is a proponent of python 3 adoption.
+
+There are plans to support other versions of python 3, but the priority is
+a bit lower than a lot of other projects the author has going now
 
 Installation
 ------------
@@ -41,10 +43,11 @@ $ pip install .
 
 .. note::
 
-    sphinx-view does not support distutils or setuptools because the
-    author has very strong feelings about python packaging and the role pip
-    plays in taking us into a bright new future of standardized and usable
-    python packaging
+   sphinx-view does not support distutils or setuptools. pip is a really
+   complete package manager and has become the de-facto standard for installing
+   python packages from remote locations. Compatability with pip is of primary
+   importance, and since pip is such a great tool, it makes the most sense to
+   the original author to use pip for local installs as well.
 
 View a single document
 ----------------------
