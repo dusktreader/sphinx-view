@@ -1,10 +1,18 @@
+.. image::  https://badge.fury.io/py/sphinx-view.svg
+   :target: https://badge.fury.io/py/sphinx-view
+   :alt:    Latest Published Version
+
+.. image::  https://travis-ci.org/dusktreader/py-buzz.svg?branch=integration
+   :target: https://travis-ci.org/dusktreader/py-buzz
+   :alt:    Build Status
+
+.. image::  https://readthedocs.org/projects/sphinx-view/badge/?version=latest
+   :target: http://sphinx-view.readthedocs.io/en/latest/?badge=latest
+   :alt:    Documentation Build Status
+
 *************
  sphinx-view
 *************
-
-.. image:: https://readthedocs.org/projects/sphinx-view/badge/?version=latest
-   :target: http://sphinx-view.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
 
 ---------------------------------------------------------------------
 View your rendered Sphinx or ReStrucutredText documents in a browswer
