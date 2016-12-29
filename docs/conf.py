@@ -21,7 +21,7 @@ import os
 import sys
 import json
 
-project_root = os.path.abspath('..')
+project_root = os.path.dirname(os.path.dirname(__file__))
 with open(os.path.join(project_root, '.project_metadata.json')) as meta_file:
     project_metadata = json.loads(meta_file.read())
 source_folder = os.path.join(
