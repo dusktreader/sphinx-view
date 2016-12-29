@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Unreleased
 ----------
+
+v0.1.1 - 2016-12-29
+-------------------
 - Added a Manifest.in
 - Updated project description in the metadata file
 - Broke code up into modules
@@ -18,7 +21,6 @@ Unreleased
 
 v0.1.0 - 2016-12-15
 -------------------
-
 - First release of sphinx-view
 - Added this CHANGELOG
 - Added a README providing a brief overview of the project
