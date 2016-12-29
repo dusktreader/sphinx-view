@@ -12,8 +12,8 @@ def create_server(**config):
     virtual environment in the build directory so that autodoc can properly
     import needed modules
     """
-    working_dir = config.get('WORKING_DIR')
-    target_path = config.get('TARGET')
+    working_dir = config['WORKING_DIR']
+    target_path = config['TARGET']
 
     template_folder = os.path.join(working_dir, 'build')
     static_folder = os.path.join(template_folder, '_static')

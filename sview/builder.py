@@ -2,10 +2,12 @@ import logging
 import os
 import pip
 import shutil
+import sphinx.apidoc
 import sphinx.application
-import textwrap
-import venv
 import sys
+import textwrap
+import types
+import venv
 
 from sview.exceptions import SviewError
 
@@ -38,9 +40,10 @@ class Builder:
         venv.create(venv_dir)  # , with_pip=True)
 
         self.logger.debug("Using pip to install target package to virtualenv")
-        pip.main(['install', '-e', self.target])
+        pip.main(['install', self.target])
 
         self.logger.debug("setting build target path to package docs")
+        self.root_dir = self.target
         self.target = os.path.join(self.target, self.package_docs)
 
         self.logger.debug("Activating virtual environment for package")
@@ -50,6 +53,7 @@ class Builder:
         for element in os.listdir(self.target):
             element_path = os.path.join(self.target, element)
             final_path = os.path.join(self.build_dir, element)
+            print("copying ", element_path, " to ", final_path)
             copy(element_path, final_path)
 
     def copy_file(self):
@@ -89,6 +93,20 @@ class Builder:
         with open(final_conf_path, 'w') as conf_file:
             conf_file.write(conf_content)
 
+    def api_doc(self):
+        opts = types.SimpleNamespace(
+            output_dir=self.build_dir,
+            maxdepth=2,
+            force=True,
+            no_toc=True,
+            module_first=True,
+            suffix=self.fetch_ext_from_index(),
+            implicit_namespaces=False,
+        )
+        modules = sphinx.apidoc.recurse_tree(self.root_dir, [], opts)
+        raise Exception(modules)
+        sphinx.apidoc.create_modules_toc_file(modules, opts)
+
     def build(self):
         """
         Rebuilds a target in a specified working directory. If the target is a
@@ -103,6 +121,9 @@ class Builder:
         else:
             self.copy_file()
         self.build_conf_file()
+
+        if self.package:
+            self.api_doc()
 
         sphinx.application.Sphinx(
             self.build_dir,
