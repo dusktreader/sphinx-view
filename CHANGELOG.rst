@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Unreleased
 ----------
+- Updated setup.py to use 'releases' from metadata as version
+  This is needed for proper package creation on pypi
 
 v0.1.2 - 2016-12-29
 -------------------
