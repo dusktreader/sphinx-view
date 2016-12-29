@@ -3,6 +3,7 @@ import json
 
 from setuptools import setup, find_packages
 
+
 with open('.project_metadata.json') as meta_file:
     project_metadata = json.loads(meta_file.read())
 
