@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 Unreleased
 ----------
+
+v0.1.3 - 2016-12-29
+-------------------
 - Updated setup.py to use 'releases' from metadata as version
   This is needed for proper package creation on pypi
 - Regenerated apidocs. Needed because modules were broken up
+- Updated conf.py to find modules more reliably
 
 v0.1.2 - 2016-12-29
 -------------------
