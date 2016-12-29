@@ -17,8 +17,9 @@ setup(
     install_requires=[
         'Flask',
         'inflection',
-        'sphinx',
         'livereload',
+        'py-buzz',
+        'sphinx',
     ],
     extras_require={
         'dev': [
