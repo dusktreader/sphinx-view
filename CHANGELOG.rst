@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+v0.1.2 - 2016-12-29
+-------------------
+- Updated travis secure password
+- Added badges to README
+
 v0.1.1 - 2016-12-29
 -------------------
 - Added a Manifest.in
