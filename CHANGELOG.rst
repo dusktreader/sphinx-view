@@ -14,6 +14,7 @@ Unreleased
 - Broke code up into modules
 - Added some tests
 - Added travis-ci configuration files
+- Added sphinx-apidoc building to package build option
 
 v0.1.0 - 2016-12-15
 -------------------

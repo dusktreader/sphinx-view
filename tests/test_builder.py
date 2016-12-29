@@ -143,5 +143,7 @@ class TestBuilder:
         builder = Builder(**config)
         builder.build()
 
-        final_path = os.path.join(str(tmpdir), 'build', 'index.html')
-        assert os.path.exists(final_path)
+        build_dir = os.path.join(str(tmpdir), 'build')
+        assert os.path.exists(os.path.join(build_dir, 'index.html'))
+        assert os.path.exists(os.path.join(build_dir, 'modules.html'))
+        assert os.path.exists(os.path.join(build_dir, 'svdummy.html'))

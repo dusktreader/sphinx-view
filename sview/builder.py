@@ -1,11 +1,14 @@
 import logging
 import os
 import pip
+import setuptools
 import shutil
+import sphinx.apidoc
 import sphinx.application
-import textwrap
-import venv
 import sys
+import textwrap
+import types
+import venv
 
 from sview.exceptions import SviewError
 
@@ -38,9 +41,10 @@ class Builder:
         venv.create(venv_dir)  # , with_pip=True)
 
         self.logger.debug("Using pip to install target package to virtualenv")
-        pip.main(['install', '-e', self.target])
+        pip.main(['install', self.target])
 
         self.logger.debug("setting build target path to package docs")
+        self.root_dir = self.target
         self.target = os.path.join(self.target, self.package_docs)
 
         self.logger.debug("Activating virtual environment for package")
@@ -50,6 +54,7 @@ class Builder:
         for element in os.listdir(self.target):
             element_path = os.path.join(self.target, element)
             final_path = os.path.join(self.build_dir, element)
+            print("copying ", element_path, " to ", final_path)
             copy(element_path, final_path)
 
     def copy_file(self):
@@ -57,7 +62,8 @@ class Builder:
         final_path = os.path.join(self.build_dir, 'index' + ext)
         copy(self.target, final_path)
 
-    def fetch_ext_from_index(self):
+    def fetch_ext_from_index(self, include_dot=True):
+        self.logger.debug("getting extension from index doc")
         possible_exts = []
         for file in os.listdir(self.build_dir):
             file_path = os.path.join(self.build_dir, file)
@@ -68,7 +74,11 @@ class Builder:
             len(possible_exts) == 1,
             "Couldn't find one index file the build directory",
         )
-        return possible_exts.pop()
+        ext = possible_exts.pop()
+        if not include_dot:
+            ext = ext.lstrip('.')
+        self.logger.debug("found index extension was '{}'".format(ext))
+        return ext
 
     def remake_build_dir(self):
         rm(self.build_dir)
@@ -89,6 +99,43 @@ class Builder:
         with open(final_conf_path, 'w') as conf_file:
             conf_file.write(conf_content)
 
+    def build_api_doc(self):
+        self.logger.debug("Generating documentation for package api")
+        opts = types.SimpleNamespace(
+            destdir=self.build_dir,
+            maxdepth=2,
+            force=True,
+            no_toc=True,
+            modulefirst=True,
+            suffix=self.fetch_ext_from_index(include_dot=False),
+            implicit_namespaces=False,
+            noheadings=False,
+            dryrun=False,
+            separatemodules=False,
+            header=os.path.basename(self.root_dir),
+        )
+        self.logger.debug("Finding packages starting at " + self.root_dir)
+        packages = setuptools.find_packages(
+            where=self.root_dir, exclude=('test*', ),
+        )
+        if len(packages) == 0:
+            self.logger.debug("Couldn't find any packages")
+            return
+        else:
+            self.logger.debug("Found packages: {}".format(packages))
+
+        self.logger.debug("Finding unique root packages")
+        unique_roots = set([p.split('.')[0] for p in packages])
+        self.logger.debug("Found unique roots: {}".format(unique_roots))
+
+        modules = []
+        self.logger.debug("Searching for modules in packages")
+        for package in unique_roots:
+            package_dir = os.path.join(self.root_dir, package)
+            modules.extend(sphinx.apidoc.recurse_tree(package_dir, [], opts))
+        self.logger.debug("Found the following modules: {}".format(modules))
+        sphinx.apidoc.create_modules_toc_file(modules, opts)
+
     def build(self):
         """
         Rebuilds a target in a specified working directory. If the target is a
@@ -103,6 +150,9 @@ class Builder:
         else:
             self.copy_file()
         self.build_conf_file()
+
+        if self.package:
+            self.build_api_doc()
 
         sphinx.application.Sphinx(
             self.build_dir,
