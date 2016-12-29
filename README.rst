@@ -15,9 +15,10 @@ you know how important it is to regularly check how they look when rendered
 into html. Often, you get your formatting wrong or introduce a syntax error.
 Constantly running sphinx-build by hand is really annoying.
 
-There is a very nice tool called `restview <https://github.com/mgedmin/restview>`_
-that can be used to view ReStructuredText files, but it doesn't support all the
-sphinx keywords and features. Furthermore, it doesn't render with a style
+There is a very nice tool called
+`restview <https://github.com/mgedmin/restview>`_ that can be used to view
+ReStructuredText files, but it doesn't support all the sphinx keywords and
+features. Furthermore, it doesn't render with a style
 
 The sphinx-view application automatically renders the documents using the
 'alabaster' theme. It renders them using Sphinx itself. It is even capable of
@@ -37,4 +38,5 @@ Super-quick Start
 Full Documentation
 ------------------
  - `spinx-view documentation home <http://sphinx-view.readthedocs.io>`_
- - `raw reStructuredText docs <https://github.com/dusktreader/sphinx-view/tree/master/docs>`_
+ - `raw reStructuredText docs
+   <https://github.com/dusktreader/sphinx-view/tree/master/docs>`_
