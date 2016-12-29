@@ -11,6 +11,7 @@ Unreleased
 ----------
 - Updated setup.py to use 'releases' from metadata as version
   This is needed for proper package creation on pypi
+- Regenerated apidocs. Needed because modules were broken up
 
 v0.1.2 - 2016-12-29
 -------------------
