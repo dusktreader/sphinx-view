@@ -43,17 +43,31 @@ if __name__ == '__main__':
         """,
         )
     parser.add_argument(
+        '-t',
+        '--theme',
+        help="""
+            Set the theme to use when building docs.
+            Defaults to alabaster.
+        """,
+        )
+    parser.add_argument(
         'target',
         help='The target to view',
     )
     args = parser.parse_args()
     print(args.target)
 
+    if args.theme is not None:
+        theme = args.theme
+    else:
+        theme = 'alabaster'
+
     config = dict(
         TARGET=expand_path(args.target),
         SERVER_PORT=args.port,
         PACKAGE=args.package,
         PACKAGE_DOCS=args.package_docs,
+        THEME=theme,
     )
 
     if args.build_dir is not None:
