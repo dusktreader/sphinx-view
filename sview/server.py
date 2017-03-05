@@ -1,6 +1,5 @@
 import flask
 import os
-import mimetypes
 
 from livereload import Server
 from sview.builder import Builder
@@ -29,23 +28,13 @@ def create_server(**config):
 
     app.logger.debug("Registering route")
 
-    def process_page(page_path):
-        # Don't allow Jinja templating to interfere with rendering the page
-        with open(os.path.join(template_folder, page_path), 'rb') as page_file:
-            page_content = page_file.read()
-
-        response = flask.make_response(page_content)
-        _, page_extension = os.path.splitext(page_path)
-        response.mimetype = mimetypes.types_map[page_extension]
-        return response
-
     @app.route('/')
     def index():
-        return process_page('index.html')
+        return flask.send_from_directory(template_folder, 'index.html')
 
     @app.route('/<path:page>')
     def subpage(page):
-        return process_page(page)
+        return flask.send_from_directory(template_folder, page)
 
     app.logger.debug("configuring livereload server")
     server = Server(app.wsgi_app)
