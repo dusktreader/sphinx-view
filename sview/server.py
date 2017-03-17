@@ -30,11 +30,11 @@ def create_server(**config):
 
     @app.route('/')
     def index():
-        return flask.render_template('index.html')
+        return flask.send_from_directory(template_folder, 'index.html')
 
     @app.route('/<path:page>')
     def subpage(page):
-        return flask.render_template(page)
+        return flask.send_from_directory(template_folder, page)
 
     app.logger.debug("configuring livereload server")
     server = Server(app.wsgi_app)
