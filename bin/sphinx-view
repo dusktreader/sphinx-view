@@ -43,6 +43,24 @@ if __name__ == '__main__':
         """,
         )
     parser.add_argument(
+        '-t',
+        '--theme',
+        help="""
+            Set the theme to use when building docs.
+            Defaults to alabaster.
+        """,
+        default='alabaster',
+        )
+    parser.add_argument(
+        '-e',
+        '--extensions',
+        help="""
+            Set to a comma separated list of Sphinx extensions to enable.
+            Defaults to sphinx.ext.autodoc.
+        """,
+        default='sphinx.ext.autodoc',
+        )
+    parser.add_argument(
         'target',
         help='The target to view',
     )
@@ -54,6 +72,8 @@ if __name__ == '__main__':
         SERVER_PORT=args.port,
         PACKAGE=args.package,
         PACKAGE_DOCS=args.package_docs,
+        THEME=args.theme,
+        EXTENSIONS=args.extensions.split(','),
     )
 
     if args.build_dir is not None:
