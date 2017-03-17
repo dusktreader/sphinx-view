@@ -21,6 +21,7 @@ class Builder:
         self.package = config.get('PACKAGE')
         self.package_docs = config.get('PACKAGE_DOCS', 'docs')
         self.build_dir = os.path.join(self.working_dir, 'build')
+        self.theme = config.get('THEME')
 
         if logger is None:
             self.logger = logging.getLogger(__name__)
@@ -89,11 +90,12 @@ class Builder:
         conf_content = textwrap.dedent("""
             source_suffix = '{ext}'
             master_doc = 'index'
-            html_theme = 'alabaster'
+            html_theme = '{theme}'
             html_static_path = ['_static']
             extensions = ['sphinx.ext.autodoc']
         """).format(
             ext=self.fetch_ext_from_index(),
+            theme=self.theme,
         )
 
         with open(final_conf_path, 'w') as conf_file:

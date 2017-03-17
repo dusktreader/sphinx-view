@@ -43,6 +43,15 @@ if __name__ == '__main__':
         """,
         )
     parser.add_argument(
+        '-t',
+        '--theme',
+        help="""
+            Set the theme to use when building docs.
+            Defaults to alabaster.
+        """,
+        default='alabaster',
+        )
+    parser.add_argument(
         'target',
         help='The target to view',
     )
@@ -54,6 +63,7 @@ if __name__ == '__main__':
         SERVER_PORT=args.port,
         PACKAGE=args.package,
         PACKAGE_DOCS=args.package_docs,
+        THEME=args.theme,
     )
 
     if args.build_dir is not None:
