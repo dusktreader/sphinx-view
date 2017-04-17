@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+v0.1.4 - 2016-04-17
+-------------------
+- Added support for user designated sphinx config file
+
 v0.1.3 - 2016-12-29
 -------------------
 - Updated setup.py to use 'releases' from metadata as version
