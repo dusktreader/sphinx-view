@@ -43,6 +43,15 @@ if __name__ == '__main__':
         """,
         )
     parser.add_argument(
+        '-c',
+        '--config',
+        help="""
+            Set the config file to use when building docs.
+            Defaults to an internal hard-coded basic sphinx config.
+        """,
+        default=None,
+        )
+    parser.add_argument(
         'target',
         help='The target to view',
     )
@@ -54,6 +63,7 @@ if __name__ == '__main__':
         SERVER_PORT=args.port,
         PACKAGE=args.package,
         PACKAGE_DOCS=args.package_docs,
+        CONFIG=args.config,
     )
 
     if args.build_dir is not None:
