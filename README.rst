@@ -15,7 +15,7 @@
 *************
 
 ---------------------------------------------------------------------
-View your rendered Sphinx or ReStrucutredText documents in a browswer
+View your rendered Sphinx or ReStrucutredText documents in a browser
 ---------------------------------------------------------------------
 
 If you've ever done much work with Sphinx (or any ReStructuredText) documents,
