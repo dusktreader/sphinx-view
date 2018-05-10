@@ -1,10 +1,12 @@
 import logging
+import fileinput
 import os
-import pip
+import re
 import setuptools
 import shutil
-import sphinx.apidoc
+import sphinx.ext.apidoc
 import sphinx.application
+import subprocess
 import sys
 import textwrap
 import types
@@ -41,22 +43,68 @@ class Builder:
         venv_dir = os.path.join(self.working_dir, 'env')
         venv.create(venv_dir)  # , with_pip=True)
 
+        self.logger.debug("Activating virtual environment for package")
+        activate_this(venv_dir)
+
         self.logger.debug("Using pip to install target package to virtualenv")
-        pip.main(['install', self.target])
+        subprocess.check_call(
+            [sys.executable, '-m', 'pip', 'install', 'my_package']
+        )
 
         self.logger.debug("setting build target path to package docs")
         self.root_dir = self.target
         self.target = os.path.join(self.target, self.package_docs)
 
-        self.logger.debug("Activating virtual environment for package")
-        activate_this(venv_dir)
-
     def copy_dir(self):
         for element in os.listdir(self.target):
             element_path = os.path.join(self.target, element)
             final_path = os.path.join(self.build_dir, element)
-            print("copying ", element_path, " to ", final_path)
             copy(element_path, final_path)
+
+    def _copy_literal_include(self, file_path):
+        report = []
+        with fileinput.input(files=file_path, inplace=True) as file:
+            for line in file:
+                match = re.search(r'\.\. literalinclude::\s*(\S+)', line)
+                if not match:
+                    print(line.rstrip())
+                else:
+                    target_dir = (
+                        self.target
+                        if os.path.isdir(self.target)
+                        else os.path.dirname(self.target)
+                    )
+                    include_path = os.path.join(
+                        target_dir,
+                        match.group(1),
+                    )
+                    include_name = os.path.basename(include_path)
+                    final_path = os.path.join(
+                        self.build_dir,
+                        include_name,
+                    )
+                    copy(include_path, final_path)
+                    print('.. literalinclude:: {}'.format(include_name))
+                    report.append(
+                        'found literal include in {}'.format(file_path)
+                    )
+                    report.append('copied {} to {}'.format(
+                        include_path,
+                        final_path,
+                    ))
+                    report.append(
+                        'substituted {} for include'.format(include_name)
+                    )
+        [self.logger.debug(r) for r in report]
+
+    def copy_literal_includes(self):
+        index_ext = self.fetch_ext_from_index()
+        for (root, dirs, files) in os.walk(self.build_dir):
+            for file_name in files:
+                file_path = os.path.join(self.build_dir, root, file_name)
+                (_, ext) = os.path.splitext(file_name)
+                if ext == index_ext:
+                    self._copy_literal_include(file_path)
 
     def copy_file(self):
         ext = os.path.splitext(self.target)[1]
@@ -73,7 +121,7 @@ class Builder:
                 possible_exts.append(file_ext)
         SviewError.require_condition(
             len(possible_exts) == 1,
-            "Couldn't find one index file the build directory",
+            "Couldn't find one index file in the build directory",
         )
         ext = possible_exts.pop()
         if not include_dot:
@@ -137,9 +185,11 @@ class Builder:
         self.logger.debug("Searching for modules in packages")
         for package in unique_roots:
             package_dir = os.path.join(self.root_dir, package)
-            modules.extend(sphinx.apidoc.recurse_tree(package_dir, [], opts))
+            modules.extend(
+                sphinx.ext.apidoc.recurse_tree(package_dir, [], opts)
+            )
         self.logger.debug("Found the following modules: {}".format(modules))
-        sphinx.apidoc.create_modules_toc_file(modules, opts)
+        sphinx.ext.apidoc.create_modules_toc_file(modules, opts)
 
     def build(self):
         """
@@ -154,6 +204,7 @@ class Builder:
             self.copy_dir()
         else:
             self.copy_file()
+        self.copy_literal_includes()
         self.build_conf_file()
 
         if self.package:
@@ -192,7 +243,7 @@ def copy(src, dst):
 def activate_this(venv_dir):
     """
     This function activates a virtual environment for the currently running
-    python interpreter. This funciton is essentially a copy of
+    python interpreter. This function is essentially a copy of
     'activate_this.py' from virtualenv, but since this application uses venv,
     this function had to be copied over. It has a few variations, but otherwise
     it has the same functionality

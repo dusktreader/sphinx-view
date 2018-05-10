@@ -46,7 +46,7 @@ def create_server(**config):
     builder.build()
 
     app.logger.debug("setting watch for target: {}".format(target_path))
-    server.watch(target_path, builder.build)
+    server.watch(target_path, lambda: builder.build())
 
     app.logger.debug("finished creating server")
     return (server, builder)

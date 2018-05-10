@@ -11,3 +11,5 @@ Table of Contents
    :caption: Contents:
 
    svdummy
+
+.. literalinclude:: ../examples/dummy.py
