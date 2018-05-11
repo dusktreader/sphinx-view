@@ -73,6 +73,23 @@ class TestBuilder:
             with open(final_path) as final_file:
                 assert original_file.read() == final_file.read()
 
+    def test_copy_literal_includes(self, tmpdir, find_data_file):
+        target = find_data_file('package')
+        config = {
+            'WORKING_DIR': str(tmpdir),
+            'TARGET': target,
+            'PACKAGE': True,
+            'PACKAGE_DOCS': 'docs',
+        }
+        builder = Builder(**config)
+        builder.remake_build_dir()
+        builder.copy_dir()
+        builder.copy_literal_includes()
+        assert os.path.exists(os.path.join(str(tmpdir), 'build', 'dummy.py'))
+        final_path = os.path.join(str(tmpdir), 'build', 'index.rst')
+        with open(final_path) as final_file:
+            assert '.. literalinclude:: dummy.py' in final_file.read()
+
     def test_fetch_ext_from_index(self, tmpdir, find_data_file):
         target = find_data_file('single.rst')
         config = {
