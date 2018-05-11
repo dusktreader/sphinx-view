@@ -62,11 +62,33 @@ the document, so you can view the file as you edit it.
 
 View a directory
 ----------------
-This feature is most useful for looking at the rendered version of docs for a
-python package. Simply target the directory with ``spinx-view`` and everything
-should just work::
+This feature is most useful for looking at the rendered version of a set of
+interrelated docs in a directory. Simply target the directory with
+``spinx-view`` and everything should just work::
 
 $ sphinx-view docs
 
 For a directory, ``sphinx-view`` will watch for changes to any of the files
 and update the browser with new changes
+
+View a package
+--------------
+This feature is most useful for looking at the rendered version of docs for a
+python package. Simply target the directory of the package with ``spinx-view``,
+supply the ``--package`` argument, and everything should just work::
+
+$ sphinx-view --package /home/dusktreader/work/sphinx-view
+
+For a package build, ``sphinx-view`` will watch for changes to any of the files
+and update the browser with new changes
+
+Using a custom config file
+--------------------------
+You can try to use sphinx-view with your own sphinx config file::
+
+$ sphinx-view --config conf.py docs
+
+However, it should be noted that many settings will not work if you have
+not installed dependencies and any additional features that you activate have
+not been tested. So, there are no guarantees that sphinx-view will work as
+intended with custom config files
