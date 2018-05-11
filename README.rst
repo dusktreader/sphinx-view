@@ -39,20 +39,9 @@ pages, and refresh the browser any time you save the documents you are viewing.
 
 Super-quick Start
 -----------------
- - requirements: `python3.5`
+ - requirements: `python3.4` or greater
  - install through pip: `$ pip install sphinx-view`
  - view a document: `$ sphinx-view README.rst`
-
-Using a custom config file
---------------------------
-You can try to use sphinx-view with your own sphinx config file::
-
-$ sphinx-view --config conf.py
-
-However, it should be noted that many settings will not work if you have
-not installed dependencies and any additional features that you activate have
-not been tested. So, there are no guarantees that sphinx-view will work as
-intended with custom config files
 
 Full Documentation
 ------------------
