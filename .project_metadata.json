@@ -5,6 +5,6 @@
     "description": "View your rendered Sphinx or ReStructuredText documents in a browser",
     "license": "MIT",
     "name": "sphinx-view",
-    "release": "0.1.4",
-    "version": "0.1"
+    "release": "0.2.0",
+    "version": "0.2"
 }
