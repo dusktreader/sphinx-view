@@ -22,6 +22,7 @@ class Builder:
         self.target = config.get('TARGET')
         self.package = config.get('PACKAGE')
         self.package_docs = config.get('PACKAGE_DOCS', 'docs')
+        self.src_dir = os.path.join(self.working_dir, 'src')
         self.build_dir = os.path.join(self.working_dir, 'build')
         self.config = config.get('CONFIG', None)
 
@@ -58,7 +59,7 @@ class Builder:
     def copy_dir(self):
         for element in os.listdir(self.target):
             element_path = os.path.join(self.target, element)
-            final_path = os.path.join(self.build_dir, element)
+            final_path = os.path.join(self.src_dir, element)
             copy(element_path, final_path)
 
     def _copy_literal_include(self, file_path):
@@ -80,7 +81,7 @@ class Builder:
                     )
                     include_name = os.path.basename(include_path)
                     final_path = os.path.join(
-                        self.build_dir,
+                        self.src_dir,
                         include_name,
                     )
                     copy(include_path, final_path)
@@ -99,23 +100,23 @@ class Builder:
 
     def copy_literal_includes(self):
         index_ext = self.fetch_ext_from_index()
-        for (root, dirs, files) in os.walk(self.build_dir):
+        for (root, dirs, files) in os.walk(self.src_dir):
             for file_name in files:
-                file_path = os.path.join(self.build_dir, root, file_name)
+                file_path = os.path.join(self.src_dir, root, file_name)
                 (_, ext) = os.path.splitext(file_name)
                 if ext == index_ext:
                     self._copy_literal_include(file_path)
 
     def copy_file(self):
         ext = os.path.splitext(self.target)[1]
-        final_path = os.path.join(self.build_dir, 'index' + ext)
+        final_path = os.path.join(self.src_dir, 'index' + ext)
         copy(self.target, final_path)
 
     def fetch_ext_from_index(self, include_dot=True):
         self.logger.debug("getting extension from index doc")
         possible_exts = []
-        for file in os.listdir(self.build_dir):
-            file_path = os.path.join(self.build_dir, file)
+        for file in os.listdir(self.src_dir):
+            file_path = os.path.join(self.src_dir, file)
             (file_name, file_ext) = os.path.splitext(file)
             if file_name == 'index' and not os.path.isdir(file_path):
                 possible_exts.append(file_ext)
@@ -129,7 +130,9 @@ class Builder:
         self.logger.debug("found index extension was '{}'".format(ext))
         return ext
 
-    def remake_build_dir(self):
+    def remake_dirs(self):
+        rm(self.src_dir)
+        os.makedirs(self.src_dir)
         rm(self.build_dir)
         os.makedirs(self.build_dir)
 
@@ -198,7 +201,7 @@ class Builder:
         working directory prior to building. This function also builds a
         simplistic conf.py for sphinx-build
         """
-        self.remake_build_dir()
+        self.remake_dirs()
 
         if os.path.isdir(self.target):
             self.copy_dir()
@@ -211,7 +214,7 @@ class Builder:
             self.build_api_doc()
 
         sphinx.application.Sphinx(
-            self.build_dir,
+            self.src_dir,
             self.build_dir,
             self.build_dir,
             self.build_dir,
