@@ -53,7 +53,7 @@ class TestBuilder:
             'PACKAGE_DOCS': 'docs',
         }
         builder = Builder(**config)
-        builder.remake_build_dir()
+        builder.remake_dirs()
         builder.copy_dir()
         assert os.path.exists(os.path.join(str(tmpdir), 'build', 'index.rst'))
 
@@ -64,7 +64,7 @@ class TestBuilder:
             'TARGET': target,
         }
         builder = Builder(**config)
-        builder.remake_build_dir()
+        builder.remake_dirs()
         builder.copy_file()
         final_path = os.path.join(str(tmpdir), 'build', 'index.rst')
         assert os.path.exists(final_path)
@@ -82,7 +82,7 @@ class TestBuilder:
             'PACKAGE_DOCS': 'docs',
         }
         builder = Builder(**config)
-        builder.remake_build_dir()
+        builder.remake_dirs()
         builder.copy_dir()
         builder.copy_literal_includes()
         assert os.path.exists(os.path.join(str(tmpdir), 'build', 'dummy.py'))
@@ -97,7 +97,7 @@ class TestBuilder:
             'TARGET': target,
         }
         builder = Builder(**config)
-        builder.remake_build_dir()
+        builder.remake_dirs()
         builder.copy_file()
         assert builder.fetch_ext_from_index() == '.rst'
 
@@ -107,7 +107,7 @@ class TestBuilder:
             'TARGET': target,
         }
         builder = Builder(**config)
-        builder.remake_build_dir()
+        builder.remake_dirs()
         builder.copy_file()
         assert builder.fetch_ext_from_index() == '.md'
 
@@ -118,7 +118,7 @@ class TestBuilder:
             'TARGET': target,
         }
         builder = Builder(**config)
-        builder.remake_build_dir()
+        builder.remake_dirs()
         builder.copy_file()
         builder.build_conf_file()
 
