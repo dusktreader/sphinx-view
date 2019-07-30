@@ -55,7 +55,7 @@ class TestBuilder:
         builder = Builder(**config)
         builder.remake_dirs()
         builder.copy_dir()
-        assert os.path.exists(os.path.join(str(tmpdir), 'build', 'index.rst'))
+        assert os.path.exists(os.path.join(str(tmpdir), 'src', 'index.rst'))
 
     def test_copy_file(self, tmpdir, find_data_file):
         target = find_data_file('single.rst')
@@ -66,7 +66,7 @@ class TestBuilder:
         builder = Builder(**config)
         builder.remake_dirs()
         builder.copy_file()
-        final_path = os.path.join(str(tmpdir), 'build', 'index.rst')
+        final_path = os.path.join(str(tmpdir), 'src', 'index.rst')
         assert os.path.exists(final_path)
 
         with open(target) as original_file:
@@ -85,8 +85,8 @@ class TestBuilder:
         builder.remake_dirs()
         builder.copy_dir()
         builder.copy_literal_includes()
-        assert os.path.exists(os.path.join(str(tmpdir), 'build', 'dummy.py'))
-        final_path = os.path.join(str(tmpdir), 'build', 'index.rst')
+        assert os.path.exists(os.path.join(str(tmpdir), 'src', 'dummy.py'))
+        final_path = os.path.join(str(tmpdir), 'src', 'index.rst')
         with open(final_path) as final_file:
             assert '.. literalinclude:: dummy.py' in final_file.read()
 
