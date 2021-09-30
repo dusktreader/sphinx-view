@@ -1,9 +1,10 @@
 import inspect
 import os
+
 import pytest
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def find_data_file():
     """
     This fixture provides a function that finds a test data file based on the
@@ -21,7 +22,8 @@ def find_data_file():
         module = inspect.getmodule(frame[0])
         return os.path.join(
             os.path.dirname(os.path.realpath(module.__file__)),
-            'data',
+            "data",
             filename,
         )
+
     return _helper
