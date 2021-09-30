@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+v0.3.1 - 2021-09-30
+-------------------
+- Moved cli to the package
+
 v0.3.0 - 2021-09-30
 -------------------
 - Fixed problem with same source and target directory

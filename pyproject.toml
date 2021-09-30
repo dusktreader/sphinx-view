@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sphinx-view"
-version = "0.3.0"
+version = "0.3.1"
 description = "View your rendered Sphinx or ReStructuredText documents in a browser"
 authors = ["Tucker Beck <tucker.beck@gmail.com>"]
 license = "MIT"
@@ -34,7 +34,7 @@ pytest-cov = "^2.12.1"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--random-order --cov=sview --cov-report=term-missing --cov-fail-under=80"
+addopts = "--random-order --cov=sview --cov-report=term-missing --cov-fail-under=70"
 testpaths = ["tests"]
 
 [tool.black]
@@ -46,7 +46,7 @@ multi_line_output = 3
 include_trailing_comma = true
 
 [tool.poetry.scripts]
-sphinx-view = 'bin.sphinx_view:main'
+sphinx-view = 'sview.cli:main'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
