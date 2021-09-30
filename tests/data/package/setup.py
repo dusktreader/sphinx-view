@@ -1,8 +1,7 @@
-from setuptools import setup, find_packages
-
+from setuptools import find_packages, setup
 
 setup(
-    install_requires=['py-dummy'],
+    install_requires=["py-dummy"],
     include_package_data=True,
     packages=find_packages(),
 )

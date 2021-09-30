@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+v0.3.0 - 2021-09-30
+-------------------
+- Fixed problem with same source and target directory
+- Switched to poetry for package management
+- Added more code quality tools
+- Switched to github actions
+
 v0.2.0 - 2018-05-10
 -------------------
 - Added support for building a package

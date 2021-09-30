@@ -1,29 +1,30 @@
-import logging
 import fileinput
+import logging
 import os
 import re
-import setuptools
 import shutil
-import sphinx.ext.apidoc
-import sphinx.application
 import subprocess
 import sys
 import textwrap
 import types
 import venv
 
+import setuptools
+import sphinx.application
+import sphinx.ext.apidoc
+
 from sview.exceptions import SviewError
 
 
 class Builder:
-
     def __init__(self, logger=None, **config):
-        self.working_dir = config.get('WORKING_DIR')
-        self.target = config.get('TARGET')
-        self.package = config.get('PACKAGE')
-        self.package_docs = config.get('PACKAGE_DOCS', 'docs')
-        self.build_dir = os.path.join(self.working_dir, 'build')
-        self.config = config.get('CONFIG', None)
+        self.working_dir = config.get("WORKING_DIR")
+        self.target = config.get("TARGET")
+        self.package = config.get("PACKAGE")
+        self.package_docs = config.get("PACKAGE_DOCS", "docs")
+        self.src_dir = os.path.join(self.working_dir, "src")
+        self.build_dir = os.path.join(self.working_dir, "build")
+        self.config = config.get("CONFIG", None)
 
         if logger is None:
             self.logger = logging.getLogger(__name__)
@@ -40,16 +41,14 @@ class Builder:
         )
 
         self.logger.debug("Creating virtualenv for package")
-        venv_dir = os.path.join(self.working_dir, 'env')
+        venv_dir = os.path.join(self.working_dir, "env")
         venv.create(venv_dir)  # , with_pip=True)
 
         self.logger.debug("Activating virtual environment for package")
         activate_this(venv_dir)
 
         self.logger.debug("Using pip to install target package to virtualenv")
-        subprocess.check_call(
-            [sys.executable, '-m', 'pip', 'install', 'my_package']
-        )
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "my_package"])
 
         self.logger.debug("setting build target path to package docs")
         self.root_dir = self.target
@@ -58,21 +57,19 @@ class Builder:
     def copy_dir(self):
         for element in os.listdir(self.target):
             element_path = os.path.join(self.target, element)
-            final_path = os.path.join(self.build_dir, element)
+            final_path = os.path.join(self.src_dir, element)
             copy(element_path, final_path)
 
     def _copy_literal_include(self, file_path):
         report = []
         with fileinput.input(files=file_path, inplace=True) as file:
             for line in file:
-                match = re.search(r'\.\. literalinclude::\s*(\S+)', line)
+                match = re.search(r"\.\. literalinclude::\s*(\S+)", line)
                 if not match:
                     print(line.rstrip())
                 else:
                     target_dir = (
-                        self.target
-                        if os.path.isdir(self.target)
-                        else os.path.dirname(self.target)
+                        self.target if os.path.isdir(self.target) else os.path.dirname(self.target)
                     )
                     include_path = os.path.join(
                         target_dir,
@@ -80,44 +77,42 @@ class Builder:
                     )
                     include_name = os.path.basename(include_path)
                     final_path = os.path.join(
-                        self.build_dir,
+                        self.src_dir,
                         include_name,
                     )
                     copy(include_path, final_path)
-                    print('.. literalinclude:: {}'.format(include_name))
+                    print(".. literalinclude:: {}".format(include_name))
+                    report.append("found literal include in {}".format(file_path))
                     report.append(
-                        'found literal include in {}'.format(file_path)
+                        "copied {} to {}".format(
+                            include_path,
+                            final_path,
+                        )
                     )
-                    report.append('copied {} to {}'.format(
-                        include_path,
-                        final_path,
-                    ))
-                    report.append(
-                        'substituted {} for include'.format(include_name)
-                    )
+                    report.append("substituted {} for include".format(include_name))
         [self.logger.debug(r) for r in report]
 
     def copy_literal_includes(self):
         index_ext = self.fetch_ext_from_index()
-        for (root, dirs, files) in os.walk(self.build_dir):
+        for (root, dirs, files) in os.walk(self.src_dir):
             for file_name in files:
-                file_path = os.path.join(self.build_dir, root, file_name)
+                file_path = os.path.join(self.src_dir, root, file_name)
                 (_, ext) = os.path.splitext(file_name)
                 if ext == index_ext:
                     self._copy_literal_include(file_path)
 
     def copy_file(self):
         ext = os.path.splitext(self.target)[1]
-        final_path = os.path.join(self.build_dir, 'index' + ext)
+        final_path = os.path.join(self.src_dir, "index" + ext)
         copy(self.target, final_path)
 
     def fetch_ext_from_index(self, include_dot=True):
         self.logger.debug("getting extension from index doc")
         possible_exts = []
-        for file in os.listdir(self.build_dir):
-            file_path = os.path.join(self.build_dir, file)
+        for file in os.listdir(self.src_dir):
+            file_path = os.path.join(self.src_dir, file)
             (file_name, file_ext) = os.path.splitext(file)
-            if file_name == 'index' and not os.path.isdir(file_path):
+            if file_name == "index" and not os.path.isdir(file_path):
                 possible_exts.append(file_ext)
         SviewError.require_condition(
             len(possible_exts) == 1,
@@ -125,37 +120,41 @@ class Builder:
         )
         ext = possible_exts.pop()
         if not include_dot:
-            ext = ext.lstrip('.')
+            ext = ext.lstrip(".")
         self.logger.debug("found index extension was '{}'".format(ext))
         return ext
 
-    def remake_build_dir(self):
+    def remake_dirs(self):
+        rm(self.src_dir)
         rm(self.build_dir)
+        os.makedirs(self.src_dir)
         os.makedirs(self.build_dir)
 
     def build_conf_file(self):
-        final_conf_path = os.path.join(self.build_dir, 'conf.py')
+        final_conf_path = os.path.join(self.src_dir, "conf.py")
         if self.config is None:
-            conf_content = textwrap.dedent("""
+            conf_content = textwrap.dedent(
+                """
                 source_suffix = '{ext}'
                 master_doc = 'index'
                 html_theme = 'alabaster'
                 html_static_path = ['_static']
                 extensions = ['sphinx.ext.autodoc']
-            """).format(
+            """
+            ).format(
                 ext=self.fetch_ext_from_index(),
             )
         else:
-            with open(self.config, 'r') as fconfig:
+            with open(self.config, "r") as fconfig:
                 conf_content = fconfig.read()
 
-        with open(final_conf_path, 'w') as conf_file:
+        with open(final_conf_path, "w") as conf_file:
             conf_file.write(conf_content)
 
     def build_api_doc(self):
         self.logger.debug("Generating documentation for package api")
         opts = types.SimpleNamespace(
-            destdir=self.build_dir,
+            destdir=self.src_dir,
             maxdepth=2,
             force=True,
             no_toc=True,
@@ -166,10 +165,12 @@ class Builder:
             dryrun=False,
             separatemodules=False,
             header=os.path.basename(self.root_dir),
+            includeprivate=True,
         )
         self.logger.debug("Finding packages starting at " + self.root_dir)
         packages = setuptools.find_packages(
-            where=self.root_dir, exclude=('test*', ),
+            where=self.root_dir,
+            exclude=("test*",),
         )
         if len(packages) == 0:
             self.logger.debug("Couldn't find any packages")
@@ -178,16 +179,14 @@ class Builder:
             self.logger.debug("Found packages: {}".format(packages))
 
         self.logger.debug("Finding unique root packages")
-        unique_roots = set([p.split('.')[0] for p in packages])
+        unique_roots = set([p.split(".")[0] for p in packages])
         self.logger.debug("Found unique roots: {}".format(unique_roots))
 
         modules = []
         self.logger.debug("Searching for modules in packages")
         for package in unique_roots:
             package_dir = os.path.join(self.root_dir, package)
-            modules.extend(
-                sphinx.ext.apidoc.recurse_tree(package_dir, [], opts)
-            )
+            modules.extend(sphinx.ext.apidoc.recurse_tree(package_dir, [], opts))
         self.logger.debug("Found the following modules: {}".format(modules))
         sphinx.ext.apidoc.create_modules_toc_file(modules, opts)
 
@@ -198,7 +197,7 @@ class Builder:
         working directory prior to building. This function also builds a
         simplistic conf.py for sphinx-build
         """
-        self.remake_build_dir()
+        self.remake_dirs()
 
         if os.path.isdir(self.target):
             self.copy_dir()
@@ -211,11 +210,11 @@ class Builder:
             self.build_api_doc()
 
         sphinx.application.Sphinx(
-            self.build_dir,
-            self.build_dir,
-            self.build_dir,
-            self.build_dir,
-            'html',
+            srcdir=self.src_dir,
+            confdir=self.src_dir,
+            outdir=self.build_dir,
+            doctreedir=self.src_dir,
+            buildername="html",
         ).build()
 
 
@@ -249,17 +248,21 @@ def activate_this(venv_dir):
     it has the same functionality
     """
     venv_dir = os.path.abspath(venv_dir)
-    bin_dir = os.path.join(venv_dir, 'bin')
-    old_os_path = os.environ.get('PATH', '')
-    os.environ['PATH'] = bin_dir + os.pathsep + old_os_path
-    if sys.platform == 'win32':
-        site_packages = os.path.join(venv_dir, 'Lib', 'site-packages')
+    bin_dir = os.path.join(venv_dir, "bin")
+    old_os_path = os.environ.get("PATH", "")
+    os.environ["PATH"] = bin_dir + os.pathsep + old_os_path
+    if sys.platform == "win32":
+        site_packages = os.path.join(venv_dir, "Lib", "site-packages")
     else:
         site_packages = os.path.join(
-            venv_dir, 'lib', 'python%s' % sys.version[:3], 'site-packages',
+            venv_dir,
+            "lib",
+            "python%s" % sys.version[:3],
+            "site-packages",
         )
     prev_sys_path = list(sys.path)
     import site
+
     site.addsitedir(site_packages)
     sys.real_prefix = sys.prefix
     sys.prefix = venv_dir

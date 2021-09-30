@@ -1,7 +1,8 @@
-import flask
 import os
 
+import flask
 from livereload import Server
+
 from sview.builder import Builder
 
 
@@ -12,11 +13,11 @@ def create_server(**config):
     virtual environment in the build directory so that autodoc can properly
     import needed modules
     """
-    working_dir = config['WORKING_DIR']
-    target_path = config['TARGET']
+    working_dir = config["WORKING_DIR"]
+    target_path = config["TARGET"]
 
-    template_folder = os.path.join(working_dir, 'build')
-    static_folder = os.path.join(template_folder, '_static')
+    template_folder = os.path.join(working_dir, "build")
+    static_folder = os.path.join(template_folder, "_static")
 
     app = flask.Flask(
         __name__,
@@ -28,11 +29,11 @@ def create_server(**config):
 
     app.logger.debug("Registering route")
 
-    @app.route('/')
+    @app.route("/")
     def index():
-        return flask.send_from_directory(template_folder, 'index.html')
+        return flask.send_from_directory(template_folder, "index.html")
 
-    @app.route('/<path:page>')
+    @app.route("/<path:page>")
     def subpage(page):
         return flask.send_from_directory(template_folder, page)
 
